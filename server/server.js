@@ -3,8 +3,12 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 
 // Load environment variables
-dotenv.config();
-
+if (process.env.NODE_ENV !== 'production') {
+  dotenv.config();
+  console.log('📁 Loaded .env file for development');
+} else {
+  console.log('🚀 Running in production mode, using Vercel environment variables');
+}
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -148,14 +152,14 @@ app.get('/', (req, res) => {
 
 // 404 handler for API routes
 
-/*
+
 app.use('/api/*',(req, res) => {
   res.status(404).json({ 
     ok: false, 
     error: 'API endpoint not found',
     path: req.originalUrl 
   });
-});*/
+});
 
 // Global error handler
 app.use((err, req, res, next) => {
