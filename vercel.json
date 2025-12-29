@@ -6,8 +6,12 @@
       "use": "@vercel/node"
     },
     {
-      "src": "client/**/*.html",
-      "use": "@vercel/static"
+      "src": "client/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "installCommand": "cd client && npm install",
+        "buildCommand": "cd client && npm run build"
+      }
     }
   ],
   "routes": [
@@ -17,7 +21,8 @@
     },
     {
       "src": "/(.*)",
-      "dest": "/client/dist/$1"
+      "dest": "/client/$1"
     }
-  ]
+  ],
+  "regions": ["hkg1"]
 }
