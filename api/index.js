@@ -1,66 +1,83 @@
-import express from 'express';
-import cors from 'cors';
-import dotenv from 'dotenv';
-
-dotenv.config();
-
-const app = express();
-
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-app.get('/health', (req, res) => {
-  res.json({ 
-    status: 'ok', 
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development'
-  });
-});
-
-app.get('/hello', (req, res) => {
-  res.json({ 
-    message: 'Hello from EFS Platform API',
-    version: '1.0.0'
-  });
-});
-
-app.get('/', (req, res) => {
-  res.json({
-    name: 'EFS Platform API',
-    status: 'running',
-    timestamp: new Date().toISOString(),
-    endpoints: ['/health', '/hello']
-  });
-});
-
-app.use('*', (req, res) => {
-  res.status(404).json({ 
-    error: 'Not Found',
-    path: req.originalUrl,
-    method: req.method
-  });
-});
-
-app.use((err, req, res, next) => {
-  console.error('API Error:', err);
-  res.status(500).json({ 
-    error: 'Internal Server Error',
-    message: process.env.NODE_ENV === 'production' ? undefined : err.message
-  });
-});
 
 export default (req, res) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
   
-  const originalUrl = req.url;
-  req.url = req.url.replace(/^\/api/, '') || '/';
+  // Set CORS headers
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   
-  if (req.url === '') {
-    req.url = '/';
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    res.statusCode = 204;
+    return res.end();
   }
   
-  console.log(`Rewritten: ${originalUrl} -> ${req.url}`);
+  // Health check endpoint
+  if (req.url === '/api/health' || req.url === '/api') {
+    res.setHeader('Content-Type', 'application/json');
+    res.statusCode = 200;
+    return res.end(JSON.stringify({ 
+      status: 'ok', 
+      message: 'API is working',
+      timestamp: new Date().toISOString(),
+      env: process.env.NODE_ENV || 'production'
+    }));
+  }
   
-  return app(req, res);
+  // Test other API endpoints
+  if (req.url.startsWith('/api/')) {
+    res.setHeader('Content-Type', 'application/json');
+    res.statusCode = 200;
+    return res.end(JSON.stringify({ 
+      endpoint: req.url,
+      method: req.method,
+      working: true,
+      timestamp: new Date().toISOString()
+    }));
+  }
+  
+  // Root path
+  if (req.url === '/') {
+    res.setHeader('Content-Type', 'text/html');
+    res.statusCode = 200;
+    return res.end(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>EFS Platform</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 40px; }
+            .container { max-width: 800px; margin: 0 auto; }
+            h1 { color: #333; }
+            .endpoints { background: #f5f5f5; padding: 20px; border-radius: 5px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <h1>EFS Platform API</h1>
+            <p>API is running successfully!</p>
+            <div class="endpoints">
+              <h3>Test endpoints:</h3>
+              <ul>
+                <li><a href="/api/health">/api/health</a> - Health check</li>
+                <li><a href="/api/test">/api/test</a> - Test endpoint</li>
+                <li><a href="/">Frontend</a></li>
+              </ul>
+            </div>
+          </div>
+        </body>
+      </html>
+    `);
+  }
+  
+  // 404 handler
+  res.setHeader('Content-Type', 'application/json');
+  res.statusCode = 404;
+  res.end(JSON.stringify({ 
+    error: 'Not Found',
+    url: req.url,
+    method: req.method,
+    timestamp: new Date().toISOString()
+  }));
 };
