@@ -6,14 +6,8 @@
       "use": "@vercel/node"
     },
     {
-      "src": "client/vite.config.js",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist",
-        "installCommand": "cd client && npm install",
-        "buildCommand": "cd client && npm run build",
-        "outputDirectory": "client/dist"
-      }
+      "src": "client/**/*.html",
+      "use": "@vercel/static"
     }
   ],
   "routes": [
@@ -22,13 +16,8 @@
       "dest": "/server/server.js"
     },
     {
-      "src": "/(.*\\.(ico|png|jpg|jpeg|svg|gif|css|js|json|woff|woff2|ttf|eot|mp4|webm|mp3))",
-      "dest": "/client/dist/$1"
-    },
-    {
       "src": "/(.*)",
-      "dest": "/client/dist/index.html"
+      "dest": "/client/dist/$1"
     }
-  ],
-  "regions": ["hkg1"]
+  ]
 }
