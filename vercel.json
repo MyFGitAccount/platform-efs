@@ -6,12 +6,8 @@
       "use": "@vercel/node"
     },
     {
-      "src": "client/package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "installCommand": "cd client && npm install",
-        "buildCommand": "cd client && npm run build"
-      }
+      "src": "client/**/*",
+      "use": "@vercel/static"
     }
   ],
   "routes": [
@@ -20,9 +16,12 @@
       "dest": "/server/server.js"
     },
     {
-      "src": "/(.*)",
+      "src": "/(.*\\.(ico|png|jpg|jpeg|svg|css|js|json))",
       "dest": "/client/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/client/index.html"
     }
-  ],
-  "regions": ["hkg1"]
+  ]
 }
