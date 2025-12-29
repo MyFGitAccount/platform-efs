@@ -23,7 +23,7 @@ const corsOptions = {
     const allowedOrigins = [
       'http://localhost:3000',
       'http://localhost:5173',
-      'https://your-app.vercel.app', // Change to your Vercel domain
+      'https://platform-efs.vercel.app', // Change to your Vercel domain
     ];
     
     if (allowedOrigins.includes(origin)) {
