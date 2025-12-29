@@ -1,20 +1,66 @@
-import app from '../server/server.js';
+import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
 
-export default async (req, res) => {
-  // Set CORS headers
-  res.setHeader('Access-Control-Allow-Credentials', true);
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, x-sid'
-  );
+dotenv.config();
 
-  // Handle preflight requests
-  if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
+const app = express();
+
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+app.get('/health', (req, res) => {
+  res.json({ 
+    status: 'ok', 
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
+
+app.get('/hello', (req, res) => {
+  res.json({ 
+    message: 'Hello from EFS Platform API',
+    version: '1.0.0'
+  });
+});
+
+app.get('/', (req, res) => {
+  res.json({
+    name: 'EFS Platform API',
+    status: 'running',
+    timestamp: new Date().toISOString(),
+    endpoints: ['/health', '/hello']
+  });
+});
+
+app.use('*', (req, res) => {
+  res.status(404).json({ 
+    error: 'Not Found',
+    path: req.originalUrl,
+    method: req.method
+  });
+});
+
+app.use((err, req, res, next) => {
+  console.error('API Error:', err);
+  res.status(500).json({ 
+    error: 'Internal Server Error',
+    message: process.env.NODE_ENV === 'production' ? undefined : err.message
+  });
+});
+
+export default (req, res) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  
+  const originalUrl = req.url;
+  req.url = req.url.replace(/^\/api/, '') || '/';
+  
+  if (req.url === '') {
+    req.url = '/';
   }
-
+  
+  console.log(`Rewritten: ${originalUrl} -> ${req.url}`);
+  
   return app(req, res);
 };
