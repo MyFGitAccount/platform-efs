@@ -2,44 +2,27 @@
   "version": 2,
   "builds": [
     {
-      "src": "api/index.js",
-      "use": "@vercel/node",
-      "config": {
-        "maxLambdaSize": "10mb"
-      }
+      "src": "server/server.js",
+      "use": "@vercel/node"
     },
     {
-      "src": "client/dist/**",
-      "use": "@vercel/static"
+      "src": "client/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "installCommand": "cd client && npm install",
+        "buildCommand": "cd client && npm run build"
+      }
     }
   ],
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "/api/index.js"
-    },
-    {
-      "src": "/static/(.*)",
-      "dest": "/client/dist/static/$1"
-    },
-    {
-      "src": "/assets/(.*)",
-      "dest": "/client/dist/assets/$1"
+      "dest": "/server/server.js"
     },
     {
       "src": "/(.*)",
-      "dest": "/client/dist/$1"
+      "dest": "/client/$1"
     }
   ],
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=3600"
-        }
-      ]
-    }
-  ]
+  "regions": ["hkg1"]
 }
