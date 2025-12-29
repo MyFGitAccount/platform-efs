@@ -1,10 +1,25 @@
 import axios from 'axios';
 
+
+let baseURL;
+
+if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+
+  baseURL = 'http://localhost:3000/api';
+} else if (window.location.hostname.includes('vercel.app')) {
+
+  baseURL = '/api';  
+  // baseURL = 'https://platform-efs.vercel.app/api';
+} else {
+  baseURL = '/api';
+}
+
 const api = axios.create({
-  baseURL: "platform-efs.vercel.app/api" || 'http://localhost:3000/api',
+  baseURL: baseURL,
   headers: {
     'Content-Type': 'application/json',
-  }
+  },
+  withCredentials: true, 
 });
 
 // Request interceptor to add auth token
