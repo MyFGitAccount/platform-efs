@@ -147,22 +147,11 @@ app.get('/', (req, res) => {
 });
 
 // 404 handler for API routes
-app.use('/api/*', (req, res) => {
+app.use('/api/(.*)', (req, res) => {
   res.status(404).json({ 
     ok: false, 
     error: 'API endpoint not found',
-    path: req.originalUrl ,
-    method:req.method
-  });
-});
-
-// Catch-all for any other routes
-app.get('*', (req, res) => {
-  res.status(404).json({
-    ok: false,
-    error: 'Route not found',
-    message: 'Please check the API documentation',
-    availableEndpoints: ['/api/auth', '/api/courses', '/api/dashboard', '/api/health']
+    path: req.originalUrl 
   });
 });
 
