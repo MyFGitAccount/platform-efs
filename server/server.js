@@ -159,6 +159,24 @@ app.use('/api',(req, res) => {
   });
 });
 
+// Catch-all route for SPA
+app.get(/.*/, (req, res) => {
+  if (req.path.startsWith('/api/')) {
+    return res.status(404).json({
+      ok: false,
+      error: 'API endpoint not found'
+    });
+  }
+  
+  // For non-API routes, this would typically serve your SPA
+  // But since we're using Vercel with separate frontend, we'll just return info
+  res.json({
+    ok: true,
+    message: 'EFS Platform API Server',
+    note: 'Frontend should be served separately'
+  });
+});
+
 // Global error handler
 app.use((err, req, res, next) => {
   console.error('Server error:', err);
